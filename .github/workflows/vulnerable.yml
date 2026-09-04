@@ -1,5 +1,5 @@
 # ============================================================
-# BEFORE , the way most pipelines look in the wild
+# BEFORE - the way most pipelines look in the wild
 #
 # Three problems, all of them ordinary:
 #   1. Third-party action referenced by MUTABLE TAG (@v1)
@@ -26,7 +26,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4        # <-- mutable tag
 
-      - name: Analyse changed files
+      - name: Analyze changed files
         uses: ./demo-action              # <-- stands in for the compromised third party
         env:
           # Everything this job holds is visible to every step in the job.
