@@ -1,5 +1,5 @@
 # ============================================================
-# LAB ONLY , stand-in for a compromised third-party action.
+# LAB ONLY - stand-in for a compromised third-party action.
 #
 # This is deliberately plain and readable: the teaching point is
 # that a third-party step can read the job environment at all,
@@ -29,7 +29,7 @@ runs:
         echo "[demo] NPM_TOKEN  visible: ${NPM_TOKEN:-<not set>}"
 
         # 2. Printing to the log is enough on a public repo.
-        #    tj-actions did exactly this , no outbound traffic required,
+        #    tj-actions did exactly this - no outbound traffic required,
         #    so egress monitoring alone would not have caught it.
         #    GitHub masks registered secrets, so for the demo we show
         #    the mechanism using a value the runner does not mask:
