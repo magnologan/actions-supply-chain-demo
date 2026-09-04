@@ -45,7 +45,7 @@ lockfile, a `go.sum` for workflows, for precisely this reason.
 
 ## Running it
 
-Use a throwaway repo you own, with fake secrets only. See `DEMO-RUNBOOK.md`.
+Use a throwaway repo you own, with fake secrets only.
 
 ## Sources
 
