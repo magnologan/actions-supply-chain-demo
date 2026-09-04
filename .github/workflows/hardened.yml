@@ -1,5 +1,5 @@
 # ============================================================
-# AFTER , same pipeline, same third-party action, no blast radius
+# AFTER - same pipeline, same third-party action, no blast radius
 #
 #   1. Actions pinned to full 40-char commit SHAs
 #   2. GITHUB_TOKEN explicitly scoped to contents: read
@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   # ---- Job 1: runs untrusted third-party code. Holds NOTHING. ----
-  analyse:
+  analyze:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -27,16 +27,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8   # v5.0.0, pinned
         # Replace with the current SHA at demo time:
-        #   gh api repos/actions/checkout/commits/v5 --jq .sha
+        # gh api repos/actions/checkout/commits/v5 --jq .sha
+        # fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
 
-      - name: Analyse changed files
+      - name: Analyze changed files
         uses: ./demo-action
         # No `env:` block. No secrets reach this step.
         # Even fully compromised, this action has nothing to harvest.
 
   # ---- Job 2: holds the privileges. Runs only first-party code. ----
   deploy:
-    needs: analyse
+    needs: analyze
     runs-on: ubuntu-latest
     permissions:
       contents: read
