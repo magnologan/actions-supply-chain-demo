@@ -1,0 +1,57 @@
+# ============================================================
+# AFTER , same pipeline, same third-party action, no blast radius
+#
+#   1. Actions pinned to full 40-char commit SHAs
+#   2. GITHUB_TOKEN explicitly scoped to contents: read
+#   3. Untrusted code runs in a job that holds NO secrets
+#   4. Cloud creds come from OIDC, so nothing long-lived exists to steal
+# ============================================================
+
+name: Build (hardened)
+
+on:
+  workflow_dispatch:
+
+# Set at workflow level so every job starts from least privilege.
+# Any scope not listed here is set to `none`.
+permissions:
+  contents: read
+
+jobs:
+  # ---- Job 1: runs untrusted third-party code. Holds NOTHING. ----
+  analyse:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8   # v5.0.0, pinned
+        # Replace with the current SHA at demo time:
+        #   gh api repos/actions/checkout/commits/v5 --jq .sha
+
+      - name: Analyse changed files
+        uses: ./demo-action
+        # No `env:` block. No secrets reach this step.
+        # Even fully compromised, this action has nothing to harvest.
+
+  # ---- Job 2: holds the privileges. Runs only first-party code. ----
+  deploy:
+    needs: analyse
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write        # required for OIDC
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+
+      # Short-lived, identity-bound credentials instead of a stored key.
+      # Nothing durable exists in the runner for an attacker to take.
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@<PIN-THIS-SHA>
+        with:
+          role-to-assume: arn:aws:iam::<account-id>:role/<demo-role>
+          aws-region: us-east-1
+
+      - name: Deploy
+        run: echo "deploying..."
