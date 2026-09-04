@@ -33,6 +33,7 @@ jobs:
           DEPLOY_KEY: ${{ secrets.DEMO_DEPLOY_KEY }}
           NPM_TOKEN: ${{ secrets.DEMO_NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEMO_LISTENER: ${{ vars.DEMO_LISTENER }}
 
       - name: Deploy
         run: echo "deploying..."
