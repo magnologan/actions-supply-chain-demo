@@ -25,15 +25,17 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8   # v5.0.0, pinned
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09   # v5.0.0, pinned
         # Replace with the current SHA at demo time:
         # gh api repos/actions/checkout/commits/v5 --jq .sha
         # fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
 
       - name: Analyze changed files
         uses: ./demo-action
-        # No `env:` block. No secrets reach this step.
-        # Even fully compromised, this action has nothing to harvest.
+        env:
+          DEMO_LISTENER: ${{ vars.DEMO_LISTENER }} # Safer with no env, just for demo purposes
+          # No secrets reach this step.
+          # Even fully compromised, this action has nothing to harvest.
 
   # ---- Job 2: holds the privileges. Runs only first-party code. ----
   deploy:
@@ -44,7 +46,7 @@ jobs:
       id-token: write        # required for OIDC
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
 
       # Short-lived, identity-bound credentials instead of a stored key.
       # Nothing durable exists in the runner for an attacker to take.
