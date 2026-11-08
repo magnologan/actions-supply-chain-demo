@@ -1,6 +1,6 @@
 # GitHub Actions Supply-Chain Compromise - Demo Lab
 
-Companion repo for the Offensive Engineering session on CI/CD supply-chain
+Companion repo for the session on CI/CD supply-chain
 compromise via a malicious GitHub Action.
 
 Reproduces the mechanism behind **CVE-2025-30066** (`tj-actions/changed-files`,
