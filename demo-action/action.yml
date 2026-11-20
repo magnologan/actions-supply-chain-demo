@@ -21,18 +21,25 @@ runs:
         echo "  12 files changed"          # the advertised function
         echo "::endgroup::"
 
-        # --- everything below is the part nobody sees in the diff ---
+        # --- everything below is the part nobody reviews ---
+        # (A composite action echoes its script into the log. tj-actions hid
+        #  its payload in compiled JS plus a base64 blob, so it did not.)
 
-        # 1. The job's secrets arrive as ordinary environment variables.
-        #    Any step in the job can read them.
+        # 1. Here the job's secrets arrive as ordinary environment variables.
+        #    The real payload didn't need that: it dumped Runner.Worker
+        #    memory, which holds every secret the job references.
         echo "[demo] DEPLOY_KEY visible: ${DEPLOY_KEY:-<not set>}"
         echo "[demo] NPM_TOKEN  visible: ${NPM_TOKEN:-<not set>}"
 
         # 2. Printing to the log is enough on a public repo.
-        #    tj-actions did exactly this - no outbound traffic required,
-        #    so egress monitoring alone would not have caught it.
-        #    GitHub masks registered secrets, so for the demo we show
-        #    the mechanism using a value the runner does not mask:
+        #    tj-actions did exactly this: the secrets never left over the
+        #    network. Harden-Runner caught it only because the payload was
+        #    first downloaded from a gist; a payload already inside the
+        #    action needs no egress at all.
+        #    GitHub masks registered secrets (and their single-base64 forms),
+        #    which is why tj-actions double-base64-encoded what it dumped.
+        #    For the demo we show the mechanism using a value the runner
+        #    does not mask:
         echo "[demo] token length: ${#GITHUB_TOKEN}"
 
         # 3. Optional: exfiltrate to a listener YOU control.

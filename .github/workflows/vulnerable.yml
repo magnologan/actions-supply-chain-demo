@@ -2,7 +2,8 @@
 # BEFORE - the way most pipelines look in the wild
 #
 # Three problems, all of them ordinary:
-#   1. Third-party action referenced by MUTABLE TAG (@v1)
+#   1. Actions referenced by MUTABLE TAG (actions/checkout@v4; in the
+#      real incident, tj-actions/changed-files@v35 / @v45)
 #   2. GITHUB_TOKEN left at repo default (may be read-write)
 #   3. Deployment secrets live in the SAME job as untrusted code
 #
@@ -16,8 +17,10 @@ on:
   workflow_dispatch:
 
 # NOTE: no `permissions:` block at all.
-# The token inherits the repo/org default, which for any repo or org
-# created before Feb 2023 (and never changed since) is READ-WRITE.
+# The token inherits the repo/org default. That is READ-WRITE for any repo
+# or org created before Feb 2023 (GitHub did not change existing ones), and
+# for any newer one where someone switched it back. This demo repo is set
+# to read-write so you can see it.
 
 jobs:
   build:
@@ -27,9 +30,11 @@ jobs:
         uses: actions/checkout@v4        # <-- mutable tag
 
       - name: Analyze changed files
-        uses: ./demo-action              # <-- stands in for the compromised third party
+        uses: ./demo-action              # <-- local stand-in for tj-actions/changed-files@v45
         env:
-          # Everything this job holds is visible to every step in the job.
+          # Passed via env here so the leak is readable on screen. The real
+          # payload did not need this: it read every secret the job references
+          # (including the Deploy step's) from Runner.Worker memory.
           DEPLOY_KEY: ${{ secrets.DEMO_DEPLOY_KEY }}
           NPM_TOKEN: ${{ secrets.DEMO_NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
